@@ -139,6 +139,33 @@ app.get("/models", (req, res) => {
   });
 });
 
+// Anthropic models endpoint (for Jan's Anthropic provider)
+app.get("/v1/messages/models", (req, res) => {
+  res.json({
+    object: "list",
+    data: [
+      {
+        id: "claude-opus-4-5",
+        object: "model",
+        created: 1687882411,
+        owned_by: "anthropic",
+        permission: [],
+        root: "claude-opus-4-5",
+        parent: null
+      },
+      {
+        id: "claude-sonnet-4-5",
+        object: "model",
+        created: 1677610602,
+        owned_by: "anthropic",
+        permission: [],
+        root: "claude-sonnet-4-5",
+        parent: null
+      }
+    ]
+  });
+});
+
 // OpenAI endpoint (with /v1 prefix)
 app.post("/v1/chat/completions", async (req, res) => {
   try {
