@@ -6,10 +6,37 @@ import { AnthropicProvider } from "./providers/anthropic-provider";
 import { ProxyHandler } from "./proxy-handler";
 
 const app = express();
+
+// CORS middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, User-Agent');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.json());
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+  }
+  next();
+});
 
 // Load configuration
 const config = loadConfig("./config/keys.json");
+
+// Override with environment variables if provided
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : config.port;
+const HOST = process.env.HOST || '0.0.0.0';
 
 // Initialize components
 const keyPool = new KeyPool(config.apiKeyPools);
@@ -22,8 +49,89 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// OpenAI endpoint
+// Models endpoint for OpenAI compatibility
+app.get("/v1/models", (req, res) => {
+  res.json({
+    object: "list",
+    data: [
+      {
+        id: "gpt-4",
+        object: "model",
+        created: 1687882411,
+        owned_by: "openai",
+        permission: [],
+        root: "gpt-4",
+        parent: null
+      },
+      {
+        id: "gpt-3.5-turbo",
+        object: "model",
+        created: 1677610602,
+        owned_by: "openai",
+        permission: [],
+        root: "gpt-3.5-turbo",
+        parent: null
+      }
+    ]
+  });
+});
+
+// OpenAI endpoint (with /v1 prefix)
 app.post("/v1/chat/completions", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        error: {
+          message: "Missing or invalid authorization header",
+          type: "invalid_request_error",
+          code: "invalid_api_key"
+        }
+      });
+    }
+
+    const userApiKey = authHeader.substring(7);
+    const sessionId = req.headers["x-session-id"] as string | undefined;
+
+    const result = await proxyHandler.handleRequest({
+      path: "/v1/chat/completions",
+      userApiKey,
+      sessionId,
+      body: req.body
+    });
+
+    // Check if streaming
+    if (result instanceof ReadableStream) {
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      const reader = result.getReader();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        res.write(value);
+      }
+
+      res.end();
+    } else {
+      res.json(result);
+    }
+  } catch (error: any) {
+    console.error("Error handling request:", error);
+    res.status(500).json({
+      error: {
+        message: error.message || "Internal server error",
+        type: "server_error",
+        code: "server_error"
+      }
+    });
+  }
+});
+
+// OpenAI endpoint (without /v1 prefix for Jan compatibility)
+app.post("/chat/completions", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -131,8 +239,8 @@ app.post("/v1/messages", async (req, res) => {
 });
 
 // Start server
-app.listen(config.port, () => {
-  console.log(`Nano-proxy listening on port ${config.port}`);
+app.listen(PORT, HOST, () => {
+  console.log(`Nano-proxy listening on ${HOST}:${PORT}`);
   console.log(`Available API key pools: ${keyPool.getPoolNames().join(", ")}`);
 });
 
