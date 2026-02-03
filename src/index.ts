@@ -94,8 +94,8 @@ app.get("/v1/models", (req, res) => {
   });
 });
 
-// Jan-specific models endpoint (only for "jan" pool)
-app.get("/models", (req, res) => {
+// Jan-specific models endpoint (only for "jan" pool) - handle both /models and //models
+app.get(["/models", "//models"], (req, res) => {
   const authHeader = req.headers.authorization;
   const userApiKey = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : "";
 
