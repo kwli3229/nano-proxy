@@ -94,76 +94,94 @@ app.get("/v1/models", (req, res) => {
   });
 });
 
-// Models endpoint (without /v1 prefix for Jan compatibility)
+// Jan-specific models endpoint (only for "jan" pool)
 app.get("/models", (req, res) => {
-  res.json({
-    object: "list",
-    data: [
-      {
-        id: "claude-opus-4-5",
-        object: "model",
-        created: 1687882411,
-        owned_by: "anthropic",
-        permission: [],
-        root: "claude-opus-4-5",
-        parent: null
-      },
-      {
-        id: "claude-sonnet-4-5",
-        object: "model",
-        created: 1677610602,
-        owned_by: "anthropic",
-        permission: [],
-        root: "claude-sonnet-4-5",
-        parent: null
-      },
-      {
-        id: "gpt-4",
-        object: "model",
-        created: 1687882411,
-        owned_by: "openai",
-        permission: [],
-        root: "gpt-4",
-        parent: null
-      },
-      {
-        id: "gpt-3.5-turbo",
-        object: "model",
-        created: 1677610602,
-        owned_by: "openai",
-        permission: [],
-        root: "gpt-3.5-turbo",
-        parent: null
-      }
-    ]
-  });
+  const authHeader = req.headers.authorization;
+  const userApiKey = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : "";
+
+  // Only return OpenAI-style models for "jan" pool
+  if (userApiKey === "jan") {
+    return res.json({
+      object: "list",
+      data: [
+        {
+          id: "claude-opus-4-5",
+          object: "model",
+          created: 1687882411,
+          owned_by: "anthropic",
+          permission: [],
+          root: "claude-opus-4-5",
+          parent: null
+        },
+        {
+          id: "claude-sonnet-4-5",
+          object: "model",
+          created: 1677610602,
+          owned_by: "anthropic",
+          permission: [],
+          root: "claude-sonnet-4-5",
+          parent: null
+        },
+        {
+          id: "gpt-4",
+          object: "model",
+          created: 1687882411,
+          owned_by: "openai",
+          permission: [],
+          root: "gpt-4",
+          parent: null
+        },
+        {
+          id: "gpt-3.5-turbo",
+          object: "model",
+          created: 1677610602,
+          owned_by: "openai",
+          permission: [],
+          root: "gpt-3.5-turbo",
+          parent: null
+        }
+      ]
+    });
+  }
+
+  // For non-jan pools, return 404
+  res.status(404).json({ error: "Not found. Use /v1/models for OpenAI compatibility." });
 });
 
-// Anthropic models endpoint (for Jan's Anthropic provider)
+// Jan-specific Anthropic models endpoint (only for "jan" pool)
 app.get("/v1/messages/models", (req, res) => {
-  res.json({
-    object: "list",
-    data: [
-      {
-        id: "claude-opus-4-5",
-        object: "model",
-        created: 1687882411,
-        owned_by: "anthropic",
-        permission: [],
-        root: "claude-opus-4-5",
-        parent: null
-      },
-      {
-        id: "claude-sonnet-4-5",
-        object: "model",
-        created: 1677610602,
-        owned_by: "anthropic",
-        permission: [],
-        root: "claude-sonnet-4-5",
-        parent: null
-      }
-    ]
-  });
+  const authHeader = req.headers.authorization;
+  const userApiKey = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : "";
+
+  // Only return for "jan" pool
+  if (userApiKey === "jan") {
+    return res.json({
+      object: "list",
+      data: [
+        {
+          id: "claude-opus-4-5",
+          object: "model",
+          created: 1687882411,
+          owned_by: "anthropic",
+          permission: [],
+          root: "claude-opus-4-5",
+          parent: null
+        },
+        {
+          id: "claude-sonnet-4-5",
+          object: "model",
+          created: 1677610602,
+          owned_by: "anthropic",
+          permission: [],
+          root: "claude-sonnet-4-5",
+          parent: null
+        }
+      ]
+    });
+  }
+
+  // For non-jan pools, return 404
+  res.status(404).json({ error: "Not found. Anthropic native API doesn't have a models endpoint." });
 });
 
 // OpenAI endpoint (with /v1 prefix)
