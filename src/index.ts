@@ -55,6 +55,24 @@ app.get("/v1/models", (req, res) => {
     object: "list",
     data: [
       {
+        id: "claude-opus-4-5",
+        object: "model",
+        created: 1687882411,
+        owned_by: "anthropic",
+        permission: [],
+        root: "claude-opus-4-5",
+        parent: null
+      },
+      {
+        id: "claude-sonnet-4-5",
+        object: "model",
+        created: 1677610602,
+        owned_by: "anthropic",
+        permission: [],
+        root: "claude-sonnet-4-5",
+        parent: null
+      },
+      {
         id: "gpt-4",
         object: "model",
         created: 1687882411,
@@ -81,6 +99,24 @@ app.get("/models", (req, res) => {
   res.json({
     object: "list",
     data: [
+      {
+        id: "claude-opus-4-5",
+        object: "model",
+        created: 1687882411,
+        owned_by: "anthropic",
+        permission: [],
+        root: "claude-opus-4-5",
+        parent: null
+      },
+      {
+        id: "claude-sonnet-4-5",
+        object: "model",
+        created: 1677610602,
+        owned_by: "anthropic",
+        permission: [],
+        root: "claude-sonnet-4-5",
+        parent: null
+      },
       {
         id: "gpt-4",
         object: "model",
