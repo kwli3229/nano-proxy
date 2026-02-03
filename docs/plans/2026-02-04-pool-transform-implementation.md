@@ -58,6 +58,8 @@ Files:
 - Create: src/pool-transformer.ts
 - Create: tests/pool-transformer.test.ts
 
+**NOTE:** This will replace the hardcoded MODEL_MAP in src/translators/openai-to-anthropic.ts with dynamic pool-level configuration.
+
 Step 1: Write failing tests
 
 Create tests/pool-transformer.test.ts:
@@ -819,7 +821,67 @@ git add src/proxy-handler.ts tests/proxy-handler.test.ts
 git commit -m "feat: apply pool transforms and streaming control in proxy handler"
 
 ---
-Task 6: Update Express Server for x-api-key Header Support
+Task 6: Refactor Hardcoded Model Map in OpenAI Translator
+
+Files:
+- Edit: src/translators/openai-to-anthropic.ts
+- Edit: tests/translators/openai-to-anthropic.test.ts (if needed)
+
+**NOTE:** The existing openai-to-anthropic.ts has a hardcoded MODEL_MAP. We need to remove it since model mapping is now handled by pool-level transforms.
+
+Step 1: Review current implementation
+
+Current src/translators/openai-to-anthropic.ts has:
+```typescript
+const MODEL_MAP: Record<string, string> = {
+  "gpt-4": "claude-opus-4-5",
+  "gpt-4-turbo": "claude-opus-4-5",
+  "gpt-3.5-turbo": "claude-sonnet-4-5",
+};
+```
+
+And uses it in line 9:
+```typescript
+model: MODEL_MAP[openaiRequest.model] || openaiRequest.model,
+```
+
+Step 2: Remove hardcoded model mapping
+
+Edit src/translators/openai-to-anthropic.ts:
+
+Remove the MODEL_MAP constant entirely (lines 1-5).
+
+Update the translateRequest function to NOT do any model mapping:
+
+```typescript
+export function translateRequest(openaiRequest: any): any {
+  const anthropicRequest: any = {
+    model: openaiRequest.model,  // Pass through as-is, pool transform will handle remapping
+    messages: [],
+  };
+
+  // Rest of the function remains the same...
+}
+```
+
+Step 3: Update tests if they rely on hardcoded mapping
+
+Check tests/translators/openai-to-anthropic.test.ts and update any tests that expect automatic model remapping to either:
+- Remove the expectation (model passes through as-is now)
+- Or document that model remapping is now handled at pool level
+
+Step 4: Verify tests pass
+
+Run: bun test tests/translators/openai-to-anthropic.test.ts
+Expected: PASS
+
+Step 5: Commit
+
+git add src/translators/openai-to-anthropic.ts tests/translators/openai-to-anthropic.test.ts
+git commit -m "refactor: remove hardcoded MODEL_MAP, use pool-level model remapping instead"
+
+---
+Task 7: Update Express Server for x-api-key Header Support
 
 Files:
 - Edit: src/index.ts
@@ -918,7 +980,7 @@ git add src/index.ts
 git commit -m "feat: support x-api-key header for authentication"
 
 ---
-Task 7: Update Example Configuration
+Task 8: Update Example Configuration
 
 Files:
 - Edit: config/keys.example.json
@@ -984,7 +1046,7 @@ git add config/keys.example.json
 git commit -m "docs: update example config with pool transform format"
 
 ---
-Task 8: Integration Testing
+Task 9: Integration Testing
 
 Files:
 - Create: tests/integration-transform.test.ts
@@ -1077,7 +1139,7 @@ git add tests/integration-transform.test.ts
 git commit -m "test: add integration tests for pool transform feature"
 
 ---
-Task 9: Update Documentation
+Task 10: Update Documentation
 
 Files:
 - Edit: README.md
@@ -1178,7 +1240,7 @@ git add README.md
 git commit -m "docs: add pool transform documentation to README"
 
 ---
-Task 10: Final Testing and Verification
+Task 11: Final Testing and Verification
 
 Step 1: Run all tests
 
