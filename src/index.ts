@@ -76,6 +76,33 @@ app.get("/v1/models", (req, res) => {
   });
 });
 
+// Models endpoint (without /v1 prefix for Jan compatibility)
+app.get("/models", (req, res) => {
+  res.json({
+    object: "list",
+    data: [
+      {
+        id: "gpt-4",
+        object: "model",
+        created: 1687882411,
+        owned_by: "openai",
+        permission: [],
+        root: "gpt-4",
+        parent: null
+      },
+      {
+        id: "gpt-3.5-turbo",
+        object: "model",
+        created: 1677610602,
+        owned_by: "openai",
+        permission: [],
+        root: "gpt-3.5-turbo",
+        parent: null
+      }
+    ]
+  });
+});
+
 // OpenAI endpoint (with /v1 prefix)
 app.post("/v1/chat/completions", async (req, res) => {
   try {
