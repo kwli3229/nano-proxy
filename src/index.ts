@@ -11,7 +11,7 @@ const app = express();
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, User-Agent');
+  res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, User-Agent, anthropic-version, anthropic-dangerous-direct-browser-access, x-api-key');
 
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
