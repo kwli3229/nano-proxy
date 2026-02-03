@@ -2,10 +2,45 @@
   "port": 3000,
   "sessionTimeout": 3600000,
   "apiKeyPools": {
-    "proxy-default": [
+    "jan": {
+      "accepts": ["jan-api-key-123"],
+      "isStreamingAllowed": false,
+      "keys": [
+        {
+          "provider": "anthropic",
+          "key": "sk-ant-xxx1",
+          "baseUrl": "https://api.anthropic.com",
+          "version": "2023-06-01",
+          "consoleUrl": "https://console.anthropic.com"
+        }
+      ],
+      "transform": {
+        "modelRemap": {
+          "claude-opus-4-5": ["gpt-4", "gpt-4-turbo"],
+          "claude-sonnet-4-5": ["gpt-3.5-turbo", "gpt-3.5"]
+        },
+        "parameterOverrides": {
+          "max_tokens": 2048,
+          "temperature": 0.7
+        }
+      }
+    },
+    "default": {
+      "accepts": ["default-key"],
+      "keys": [
+        {
+          "provider": "anthropic",
+          "key": "sk-ant-xxx2",
+          "baseUrl": "https://api.anthropic.com",
+          "version": "2023-06-01",
+          "consoleUrl": "https://console.anthropic.com"
+        }
+      ]
+    },
+    "old-format-example": [
       {
         "provider": "anthropic",
-        "key": "sk-ant-xxx1",
+        "key": "sk-ant-xxx3",
         "baseUrl": "https://api.anthropic.com",
         "version": "2023-06-01",
         "consoleUrl": "https://console.anthropic.com"
