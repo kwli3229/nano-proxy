@@ -97,8 +97,16 @@ app.get("/v1/models", (req, res) => {
 // OpenAI endpoint (with /v1 prefix)
 app.post("/v1/chat/completions", async (req, res) => {
   try {
+    // Accept either Authorization header or x-api-key header
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const apiKey = req.headers["x-api-key"] as string;
+
+    let userApiKey: string;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      userApiKey = authHeader.substring(7);
+    } else if (apiKey) {
+      userApiKey = apiKey;
+    } else {
       return res.status(401).json({
         error: {
           message: "Missing or invalid authorization header",
@@ -108,7 +116,6 @@ app.post("/v1/chat/completions", async (req, res) => {
       });
     }
 
-    const userApiKey = authHeader.substring(7);
     const sessionId = req.headers["x-session-id"] as string | undefined;
 
     const result = await proxyHandler.handleRequest({
@@ -151,8 +158,16 @@ app.post("/v1/chat/completions", async (req, res) => {
 // Anthropic endpoint
 app.post("/v1/messages", async (req, res) => {
   try {
+    // Accept either Authorization header or x-api-key header
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const apiKey = req.headers["x-api-key"] as string;
+
+    let userApiKey: string;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      userApiKey = authHeader.substring(7);
+    } else if (apiKey) {
+      userApiKey = apiKey;
+    } else {
       return res.status(401).json({
         type: "error",
         error: {
@@ -162,7 +177,6 @@ app.post("/v1/messages", async (req, res) => {
       });
     }
 
-    const userApiKey = authHeader.substring(7);
     const sessionId = req.headers["x-session-id"] as string | undefined;
 
     const result = await proxyHandler.handleRequest({
