@@ -44,6 +44,23 @@ const sessionManager = new SessionManager(config.sessionTimeout);
 const provider = new AnthropicProvider();
 const proxyHandler = new ProxyHandler(keyPool, sessionManager, provider);
 
+// Helper function to extract API key
+function extractApiKey(req: express.Request): string | null {
+  // Check x-api-key header first
+  const xApiKey = req.headers['x-api-key'] as string | undefined;
+  if (xApiKey) {
+    return xApiKey;
+  }
+
+  // Fallback to Authorization header
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.substring(7);
+  }
+
+  return null;
+}
+
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
@@ -97,16 +114,9 @@ app.get("/v1/models", (req, res) => {
 // OpenAI endpoint (with /v1 prefix)
 app.post("/v1/chat/completions", async (req, res) => {
   try {
-    // Accept either Authorization header or x-api-key header
-    const authHeader = req.headers.authorization;
-    const apiKey = req.headers["x-api-key"] as string;
+    const userApiKey = extractApiKey(req);
 
-    let userApiKey: string;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      userApiKey = authHeader.substring(7);
-    } else if (apiKey) {
-      userApiKey = apiKey;
-    } else {
+    if (!userApiKey) {
       return res.status(401).json({
         error: {
           message: "Missing or invalid authorization header",
@@ -160,16 +170,9 @@ app.post("/v1/chat/completions", async (req, res) => {
 // Anthropic endpoint
 app.post("/v1/messages", async (req, res) => {
   try {
-    // Accept either Authorization header or x-api-key header
-    const authHeader = req.headers.authorization;
-    const apiKey = req.headers["x-api-key"] as string;
+    const userApiKey = extractApiKey(req);
 
-    let userApiKey: string;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      userApiKey = authHeader.substring(7);
-    } else if (apiKey) {
-      userApiKey = apiKey;
-    } else {
+    if (!userApiKey) {
       return res.status(401).json({
         type: "error",
         error: {
