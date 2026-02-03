@@ -19,9 +19,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Increase body size limit for image support (50MB)
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Increase body size limit for image support (5MB)
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
