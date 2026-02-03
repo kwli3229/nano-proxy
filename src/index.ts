@@ -181,11 +181,24 @@ app.post("/v1/messages", async (req, res) => {
 
     const sessionId = req.headers["x-session-id"] as string | undefined;
 
+    // Jan-specific model name transformation (only for "jan" pool)
+    let requestBody = req.body;
+    if (userApiKey === "jan" && requestBody.model) {
+      const modelMap: Record<string, string> = {
+        "opus": "claude-opus-4-5",
+        "sonnet": "claude-sonnet-4-5",
+        "haiku": "claude-3-5-haiku-20241022"
+      };
+      if (modelMap[requestBody.model]) {
+        requestBody = { ...requestBody, model: modelMap[requestBody.model] };
+      }
+    }
+
     const result = await proxyHandler.handleRequest({
       path: "/v1/messages",
       userApiKey,
       sessionId,
-      body: req.body
+      body: requestBody
     });
 
     // Check if streaming
@@ -222,6 +235,13 @@ app.post("/v1/messages", async (req, res) => {
       });
     }
   }
+});
+
+// Jan-specific endpoint for double /v1 (when Jan adds /v1 twice)
+app.post("/v1/v1/messages", async (req, res) => {
+  // Redirect to the correct endpoint
+  req.url = "/v1/messages";
+  return app._router.handle(req, res, () => {});
 });
 
 // Start server
