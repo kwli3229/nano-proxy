@@ -1,0 +1,32 @@
+services:
+  nano-proxy:
+    container_name: nano-proxy
+    networks:
+      - nano-net
+    ports:
+      - "${NANO_PROXY_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - REDIS_URL=redis://redis:6379
+    restart: unless-stopped
+
+  redis:
+    image: docker.io/redis:7-alpine
+    container_name: nano-proxy-redis
+    networks:
+      - nano-net
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  nano-net:
+    driver: bridge
+
+volumes:
+  redis-data:

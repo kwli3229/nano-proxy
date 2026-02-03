@@ -1,0 +1,13 @@
+services:
+  nano-proxy:
+    build:
+      context: ..
+      dockerfile: compose/Containerfile.dev
+    volumes:
+      - ../src:/app/src:z
+      - ../config:/app/config:z
+      - ../package.json:/app/package.json:z
+      - ../tsconfig.json:/app/tsconfig.json:z
+    environment:
+      - NODE_ENV=development
+    command: bun --watch src/index.ts

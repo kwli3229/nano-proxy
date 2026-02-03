@@ -1,0 +1,12 @@
+FROM docker.io/oven/bun:alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json ./
+RUN bun install
+
+# Source code mounted as volume
+EXPOSE 3000
+
+CMD ["bun", "--watch", "src/index.ts"]
