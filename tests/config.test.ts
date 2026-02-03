@@ -5,7 +5,7 @@ describe("Config", () => {
   test("should load configuration from file", () => {
     const config = loadConfig("./config/keys.example.json");
     expect(config.port).toBe(3000);
-    expect(config.apiKeyPools["proxy-default"]).toBeDefined();
+    expect(config.apiKeyPools["jan"]).toBeDefined();
   });
 
   test("should throw error for missing file", () => {
