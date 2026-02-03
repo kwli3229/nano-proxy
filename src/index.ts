@@ -195,11 +195,15 @@ app.post("/v1/messages", async (req, res) => {
       res.setHeader("Connection", "keep-alive");
 
       const reader = result.getReader();
+      const encoder = new TextEncoder();
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        res.write(value);
+
+        // Format as SSE for Anthropic native format
+        const sseData = `event: ${value.type}\ndata: ${JSON.stringify(value)}\n\n`;
+        res.write(encoder.encode(sseData));
       }
 
       res.end();
