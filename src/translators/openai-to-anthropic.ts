@@ -1,12 +1,6 @@
-const MODEL_MAP: Record<string, string> = {
-  "gpt-4": "claude-opus-4-5",
-  "gpt-4-turbo": "claude-opus-4-5",
-  "gpt-3.5-turbo": "claude-sonnet-4-5",
-};
-
 export function translateRequest(openaiRequest: any): any {
   const anthropicRequest: any = {
-    model: MODEL_MAP[openaiRequest.model] || openaiRequest.model,
+    model: openaiRequest.model,  // Pass through as-is, pool transform will handle remapping
     messages: [],
   };
 

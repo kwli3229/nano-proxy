@@ -14,7 +14,8 @@ describe("OpenAI to Anthropic Translator", () => {
 
     const result = translateRequest(openaiRequest);
 
-    expect(result.model).toBe("claude-opus-4-5");
+    // Model is passed through as-is; pool transform will handle remapping
+    expect(result.model).toBe("gpt-4");
     expect(result.messages).toEqual([{ role: "user", content: "Hello" }]);
     expect(result.max_tokens).toBe(100);
     expect(result.temperature).toBe(0.7);
@@ -35,9 +36,11 @@ describe("OpenAI to Anthropic Translator", () => {
     expect(result.messages).toEqual([{ role: "user", content: "Hello" }]);
   });
 
-  test("should map model names", () => {
-    expect(translateRequest({ model: "gpt-4", messages: [] }).model).toBe("claude-opus-4-5");
-    expect(translateRequest({ model: "gpt-3.5-turbo", messages: [] }).model).toBe("claude-sonnet-4-5");
+  test("should pass through model names without remapping", () => {
+    // Model remapping is now handled at pool level, not in translator
+    expect(translateRequest({ model: "gpt-4", messages: [] }).model).toBe("gpt-4");
+    expect(translateRequest({ model: "gpt-3.5-turbo", messages: [] }).model).toBe("gpt-3.5-turbo");
+    expect(translateRequest({ model: "claude-opus-4-5", messages: [] }).model).toBe("claude-opus-4-5");
   });
 
   test("should rename stop to stop_sequences", () => {
