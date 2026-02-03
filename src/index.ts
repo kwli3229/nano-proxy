@@ -145,13 +145,15 @@ app.post("/v1/chat/completions", async (req, res) => {
     }
   } catch (error: any) {
     console.error("Error handling request:", error);
-    res.status(500).json({
-      error: {
-        message: error.message || "Internal server error",
-        type: "server_error",
-        code: "server_error"
-      }
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: {
+          message: error.message || "Internal server error",
+          type: "server_error",
+          code: "server_error"
+        }
+      });
+    }
   }
 });
 
@@ -206,13 +208,15 @@ app.post("/v1/messages", async (req, res) => {
     }
   } catch (error: any) {
     console.error("Error handling request:", error);
-    res.status(500).json({
-      type: "error",
-      error: {
-        type: "api_error",
-        message: error.message || "Internal server error"
-      }
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        type: "error",
+        error: {
+          type: "api_error",
+          message: error.message || "Internal server error"
+        }
+      });
+    }
   }
 });
 
