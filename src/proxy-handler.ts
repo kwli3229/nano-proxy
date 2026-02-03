@@ -23,9 +23,14 @@ export class ProxyHandler {
 
   async handleRequest(request: ProxyRequest): Promise<any> {
     try {
-      // Validate user API key
-      if (!this.keyPool.hasPool(request.userApiKey)) {
-        throw new Error("Invalid API key");
+      // Use proxy-default as fallback if pool doesn't exist
+      let userApiKey = request.userApiKey;
+      if (!this.keyPool.hasPool(userApiKey)) {
+        if (this.keyPool.hasPool("proxy-default")) {
+          userApiKey = "proxy-default";
+        } else {
+          throw new Error("Invalid API key");
+        }
       }
 
       // Detect format
@@ -37,13 +42,13 @@ export class ProxyHandler {
       // Get provider key (with session stickiness if session ID provided)
       let providerKey;
       if (request.sessionId) {
-        providerKey = this.sessionManager.get(request.sessionId, request.userApiKey);
+        providerKey = this.sessionManager.get(request.sessionId, userApiKey);
         if (!providerKey) {
-          providerKey = this.keyPool.selectKey(request.userApiKey);
-          this.sessionManager.set(request.sessionId, request.userApiKey, providerKey);
+          providerKey = this.keyPool.selectKey(userApiKey);
+          this.sessionManager.set(request.sessionId, userApiKey, providerKey);
         }
       } else {
-        providerKey = this.keyPool.selectKey(request.userApiKey);
+        providerKey = this.keyPool.selectKey(userApiKey);
       }
 
       // Translate request if OpenAI format
