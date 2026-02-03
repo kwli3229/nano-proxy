@@ -1,0 +1,15 @@
+{
+  "port": 3000,
+  "sessionTimeout": 3600000,
+  "apiKeyPools": {
+    "proxy-default": [
+      {
+        "provider": "anthropic",
+        "key": "sk-ant-xxx1",
+        "baseUrl": "https://api.anthropic.com",
+        "version": "2023-06-01",
+        "consoleUrl": "https://console.anthropic.com"
+      }
+    ]
+  }
+}
